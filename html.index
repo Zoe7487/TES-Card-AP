@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TES Access Card Application Flow</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+        }
+        /* 系統角色專屬顏色定義 */
+        .system-aos-app {
+            color: #10B981; /* Emerald 500 */
+            font-weight: 700;
+            background-color: #ECFDF5;
+            border: 1px solid #A7F3D0;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .system-phm {
+            color: #3B82F6; /* Blue 500 */
+            font-weight: 700;
+            background-color: #EFF6FF;
+            border: 1px solid #BFDBFE;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .system-saho {
+            color: #F59E0B; /* Amber 500 */
+            font-weight: 700;
+            background-color: #FEF3C7;
+            border: 1px solid #FDE68A;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .system-aos-system {
+            color: #8B5CF6; /* Violet 500 */
+            font-weight: 700;
+            background-color: #F5F3FF;
+            border: 1px solid #DDD6FE;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .system-powerschool {
+            color: #EF4444; /* Red 500 */
+            font-weight: 700;
+            background-color: #FEF2F2;
+            border: 1px solid #FCA5A5;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between">
+            <div class="flex items-center space-x-3 mb-4 md:mb-0">
+                <div class="bg-indigo-600 p-2.5 rounded-lg shadow-inner">
+                    <!-- SVG Logo Icon -->
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold tracking-tight">TES Access Card Application</h1>
+                    <p class="text-xs text-slate-300">台北歐洲學校 門禁卡申請與帳務、製卡系統自動化對接流程說明</p>
+                </div>
+            </div>
+            <div class="flex space-x-2">
+                <span class="text-xs bg-slate-800 border border-slate-700 text-slate-300 px-3 py-1.5 rounded-full flex items-center">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse"></span>
+                    系統整合規格 v1.2
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        
+        <!-- Section 1: Design Overview & Legend -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-8">
+            <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                設計說明與系統角色定義
+            </h2>
+            <p class="text-sm text-slate-600 mb-6 leading-relaxed">
+                本流程旨在串聯<strong>台北歐洲學校（TES）</strong>家長端 APP、系統商、門禁卡商與校務核心資料庫。為確保閱讀清晰，本頁面將各大核心系統進行顏色與字樣標準化標記，請對照以下角色定義：
+            </p>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                <!-- AOS APP Card -->
+                <div class="bg-emerald-50/50 border border-emerald-100 rounded-xl p-4 transition duration-200 hover:shadow-md">
+                    <div class="flex items-center space-x-2 mb-2">
+                        <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                        <span class="system-aos-app">AOS APP</span>
+                    </div>
+                    <p class="text-xs text-slate-500 leading-relaxed">
+                        前端家長使用的行動應用程式，提供「Access Card Request」申請入口。
+                    </p>
+                </div>
+                
+                <!-- PHM Card -->
+                <div class="bg-blue-50/50 border border-blue-100 rounded-xl p-4 transition duration-200 hover:shadow-md">
+                    <div class="flex items-center space-x-2 mb-2">
+                        <span class="w-3 h-3 rounded-full bg-blue-500"></span>
+                        <span class="system-phm">PHM</span>
+                    </div>
+                    <p class="text-xs text-slate-500 leading-relaxed">
+                        系統開發公司代稱。負責承接前端請求、自動化帳務開單與 API 串接調度。
+                    </p>
+                </div>
+
+                <!-- Saho Card -->
+                <div class="bg-amber-50/50 border border-amber-100 rounded-xl p-4 transition duration-200 hover:shadow-md">
+                    <div class="flex items-center space-x-2 mb-2">
+                        <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+                        <span class="system-saho">Saho</span>
+                    </div>
+                    <p class="text-xs text-slate-500 leading-relaxed">
+                        門禁硬體與製卡廠商。負責卡片申請資料搜集、物理製卡與狀態更新。
+                    </p>
+                </div>
+
+                <!-- AOS System Card -->
+                <div class="bg-purple-50/50 border border-purple-100 rounded-xl p-4 transition duration-200 hover:shadow-md">
+                    <div class="flex items-center space-x-2 mb-2">
+                        <span class="w-3 h-3 rounded-full bg-violet-500"></span>
+                        <span class="system-aos-system">AOS System</span>
+                    </div>
+                    <p class="text-xs text-slate-500 leading-relaxed">
+                        TES 內部使用的後台帳務與卡片管理系統，記錄最終有效的卡片清單。
+                    </p>
+                </div>
+
+                <!-- PowerSchool Card -->
+                <div class="bg-red-50/50 border border-red-100 rounded-xl p-4 transition duration-200 hover:shadow-md">
+                    <div class="flex items-center space-x-2 mb-2">
+                        <span class="w-3 h-3 rounded-full bg-rose-500"></span>
+                        <span class="system-powerschool">PowerSchool</span>
+                    </div>
+                    <p class="text-xs text-slate-500 leading-relaxed">
+                        TES 使用的校務核心行政資訊系統（SIS），作為學生成員資料之基準。
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Interactive Simulation & Timeline Dashboard -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Left Grid: Step-by-Step Timeline (7 cols) -->
+            <div class="lg:col-span-7 bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
+                    <h2 class="text-lg font-bold text-slate-900 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                        申請與串接作業流程 (9 大步驟)
+                    </h2>
+                    <span class="text-xs text-indigo-600 font-semibold bg-indigo-50 px-2 py-1 rounded-md">點擊各步驟模擬動態</span>
+                </div>
+
+                <!-- Timeline wrapper -->
+                <div class="space-y-4 relative">
+                    <!-- Line decoration -->
+                    <div class="absolute left-6 top-4 bottom-4 w-0.5 bg-slate-200 pointer-events-none"></div>
+
+                    <!-- Step 1 -->
+                    <div onclick="selectStep(1)" id="step-card-1" class="step-card cursor-pointer relative pl-12 pr-4 py-4 rounded-xl border border-slate-100 bg-white hover:bg-slate-50/80 transition-all duration-200">
+                        <div class="absolute left-3.5 top-5 w-6.5 h-6.5 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-xs font-bold text-slate-600 transition-all duration-300 shadow-sm" id="step-badge-1">1</div>
+                        <h3 class="text-sm font-bold text-slate-800 flex flex-wrap items-center gap-1.5">
+                            家長登入 <span class="system-aos-app">AOS APP</span>
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1">
+                            家長開啟手機應用程式，於主選單中點選 <strong class="text-slate-700 bg-slate-100 px-1 py-0.5 rounded">" Access Card Request "</strong> 功能圖示（ICON）。
+                        </p>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div onclick="selectStep(2)" id="step-card-2" class="step-card cursor-pointer relative pl-12 pr-4 py-4 rounded-xl border border-slate-100 bg-white hover:bg-slate-50/80 transition-all duration-200">
+                        <div class="absolute left-3.5 top-5 w-6.5 h-6.5 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-xs font-bold text-slate-600 transition-all duration-300 shadow-sm" id="step-badge-2">2</div>
+                        <h3 class="text-sm font-bold text-slate-800 flex flex-wrap items-center gap-1.5">
+                            <span class="system-phm">PHM</span> 發送 "申請API" 給 <span class="system-saho">Saho</span>
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1">
+                            背後觸發：<span class="system-phm">PHM</span> 系統向 <span class="system-saho">Saho</span> 傳送 API 請求。
+                        </p>
+                        <!-- Badge labels -->
+                        <div class="flex flex-wrap gap-1.5 mt-2">
+                            <span class="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-md font-mono font-medium">StudentKey</span>
+                            <span class="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-md font-mono font-medium">FamilyKey</span>
+                            <span class="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-md font-mono font-medium">Parent Account (SSO Email)</span>
+                        </div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div onclick="selectStep(3)" id="step-card-3" class="step-card cursor-pointer relative pl-12 pr-4 py-4 rounded-xl border border-slate-100 bg-white hover:bg-slate-50/80 transition-all duration-200">
+                        <div class="absolute left-3.5 top-5 w-6.5 h-6.5 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-xs font-bold text-slate-600 transition-all duration-300 shadow-sm" id="step-badge-3">3</div>
+                        <h3 class="text-sm font-bold text-slate-800 flex flex-wrap items-center gap-1.5">
+                            網頁跳轉至 <span class="system-saho">Saho</span> 申請頁面
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1">
+                            家長的手機畫面無縫導向（Redirect）至由 <span class="system-saho">Saho</span> 託管的外部網頁，填寫申請表細節與上傳照片。
+                        </p>
+                    </div>
+
+                    <!-- Step 4 -->
+                    <div onclick="selectStep(4)" id="step-card-4" class="step-card cursor-pointer relative pl-12 pr-4 py-4 rounded-xl border border-slate-100 bg-white hover:bg-slate-50/80 transition-all duration-200">
+                        <div class="absolute left-3.5 top-5 w-6.5 h-6.5 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-xs font-bold text-slate-600 transition-all duration-300 shadow-sm" id="step-badge-4">4</div>
+                        <h3 class="text-sm font-bold text-slate-800 flex flex-wrap items-center gap-1.5">
+                            <span class="system-saho">Saho</span> 回傳 "開立訂單API" 給 <span class="system-phm">PHM</span>
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1">
+                            家長完成申請填寫後，<span class="system-saho">Saho</span> 系統回呼 <span class="system-phm">PHM</span> 的 API 要求建立繳費帳單。
+                        </p>
+                        <div class="flex flex-wrap gap-1.5 mt-2">
+                            <span class="text-[10px] bg-amber-50 text-amber-700 px-2 py-0.5 rounded-md font-mono font-medium">StudentKey</span>
+                            <span class="text-[10px] bg-amber-50 text-amber-700 px-2 py-0.5 rounded-md font-mono font-medium">FamilyKey</span>
+                            <span class="text-[10px] bg-amber-50 text-amber-700 px-2 py-0.5 rounded-md font-mono font-medium">Amount (金額)</span>
+                        </div>
+                    </div>
+
+                    <!-- Step 5 -->
+                    <div onclick="selectStep(5)" id="step-card-5" class="step-card cursor-pointer relative pl-12 pr-4 py-4 rounded-xl border border-slate-100 bg-white hover:bg-slate-50/80 transition-all duration-200">
+                        <div class="absolute left-3.5 top-5 w-6.5 h-6.5 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-xs font-bold text-slate-600 transition-all duration-300 shadow-sm" id="step-badge-5">5</div>
+                        <h3 class="text-sm font-bold text-slate-800 flex flex-wrap items-center gap-1.5">
+                            <span class="system-phm">PHM</span> 自動開立訂單
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1">
+                            <span class="system-phm">PHM</span> 接獲回傳後，於系統後台自動產生繳費單。
+                        </p>
+                        <div class="mt-2 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                            <p class="text-[11px] text-slate-600 leading-normal">
+                                <strong class="text-amber-600 font-semibold">💡 特例與例外說明：</strong><br>
+                                部分特例須由 <strong>TES</strong> 事先提供必要資料予 <span class="system-saho">Saho</span>。當 <span class="system-saho">Saho</span> 傳送 <span class="font-mono text-[10px] bg-slate-200 px-1 rounded">Amount</span> 欄位時直接訂立，以確保自動化程序不中斷。
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Step 6 -->
+                    <div onclick="selectStep(6)" id="step-card-6" class="step-card cursor-pointer relative pl-12 pr-4 py-4 rounded-xl border border-slate-100 bg-white hover:bg-slate-50/80 transition-all duration-200">
+                        <div class="absolute left-3.5 top-5 w-6.5 h-6.5 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-xs font-bold text-slate-600 transition-all duration-300 shadow-sm" id="step-badge-6">6</div>
+                        <h3 class="text-sm font-bold text-slate-800 flex flex-wrap items-center gap-1.5">
+                            <span class="system-phm">PHM</span> 提供 "訂單繳費查詢API"
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1">
+                            <span class="system-phm">PHM</span> 發行並託管此查詢端點，供外部查詢付款狀態。
+                        </p>
+                        <div class="flex flex-wrap gap-1.5 mt-2">
+                            <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-mono">OrderId (訂單編號)</span>
+                            <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-mono">StudentKey</span>
+                            <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-mono">FamilyKey</span>
+                            <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-mono">Amount</span>
+                            <span class="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-md font-mono font-semibold">PaymentStatus (Paid / Unpaid)</span>
+                        </div>
+                    </div>
+
+                    <!-- Step 7 -->
+                    <div onclick="selectStep(7)" id="step-card-7" class="step-card cursor-pointer relative pl-12 pr-4 py-4 rounded-xl border border-slate-100 bg-white hover:bg-slate-50/80 transition-all duration-200">
+                        <div class="absolute left-3.5 top-5 w-6.5 h-6.5 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-xs font-bold text-slate-600 transition-all duration-300 shadow-sm" id="step-badge-7">7</div>
+                        <h3 class="text-sm font-bold text-slate-800 flex flex-wrap items-center gap-1.5">
+                            <span class="system-saho">Saho</span> 輪詢查詢繳費狀態
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1">
+                            <span class="system-saho">Saho</span> 主動呼叫 <span class="system-phm">PHM</span> 的「訂單繳費查詢API」，確認款項入帳狀況。若為 <span class="text-emerald-600 font-semibold bg-emerald-50 px-1 rounded">Paid</span> 則可正式開始製卡。
+                        </p>
+                    </div>
+
+                    <!-- Step 8 -->
+                    <div onclick="selectStep(8)" id="step-card-8" class="step-card cursor-pointer relative pl-12 pr-4 py-4 rounded-xl border border-slate-100 bg-white hover:bg-slate-50/80 transition-all duration-200">
+                        <div class="absolute left-3.5 top-5 w-6.5 h-6.5 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-xs font-bold text-slate-600 transition-all duration-300 shadow-sm" id="step-badge-8">8</div>
+                        <h3 class="text-sm font-bold text-slate-800 flex flex-wrap items-center gap-1.5">
+                            <span class="system-saho">Saho</span> 傳送開卡資料給 <span class="system-powerschool">PowerSchool</span>
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1">
+                            卡片製作完成後，由 <span class="system-saho">Saho</span> 將新增的卡片物理編號與學生連結資料推送到校務核心系統 <span class="system-powerschool">PowerSchool</span>。
+                        </p>
+                    </div>
+
+                    <!-- Step 9 -->
+                    <div onclick="selectStep(9)" id="step-card-9" class="step-card cursor-pointer relative pl-12 pr-4 py-4 rounded-xl border border-slate-100 bg-white hover:bg-slate-50/80 transition-all duration-200">
+                        <div class="absolute left-3.5 top-5 w-6.5 h-6.5 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-xs font-bold text-slate-600 transition-all duration-300 shadow-sm" id="step-badge-9">9</div>
+                        <h3 class="text-sm font-bold text-slate-800 flex flex-wrap items-center gap-1.5">
+                            <span class="system-phm">PHM</span> 同步與 <span class="system-aos-system">AOS System</span> 自動核發
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1">
+                            <span class="system-phm">PHM</span> 串接調用 <span class="system-powerschool">PowerSchool</span> "學生卡 API"（含 <span class="font-mono text-slate-700">Studentkey</span>、<span class="font-mono text-slate-700">CardNumber</span>），自動在 <span class="system-aos-system">AOS System</span> 新增新卡片，並將該家長/學生的舊卡設定為停用（Inactive）狀態。
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Right Grid: Visual Simulator & Tech Payload Explorer (5 cols) -->
+            <div class="lg:col-span-5 space-y-8">
+                
+                <!-- Visual Dataflow Simulator Panel -->
+                <div class="bg-slate-900 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden min-h-[380px] flex flex-col justify-between">
+                    <!-- Background Grid Effect -->
+                    <div class="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:2rem_2rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-35 pointer-events-none"></div>
+
+                    <div class="relative z-10">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-sm font-bold text-indigo-300 uppercase tracking-widest flex items-center">
+                                <span class="w-2.5 h-2.5 rounded-full bg-indigo-500 mr-2 animate-ping"></span>
+                                Live Flow Simulator
+                            </h3>
+                            <span id="simulator-step-num" class="text-xs bg-indigo-900/80 border border-indigo-700 text-indigo-200 px-2.5 py-0.5 rounded-full font-mono">Step 1/9</span>
+                        </div>
+                        <p id="simulator-desc" class="text-xs text-slate-300 leading-relaxed mb-6">
+                            請點選左側步驟，觀測不同系統在不同階段的角色轉變與連線數據。
+                        </p>
+                    </div>
+
+                    <!-- System Nodes Visualization -->
+                    <div class="relative z-10 my-4 py-8 flex flex-col items-center justify-center">
+                        <div class="w-full flex justify-between items-center px-4 relative">
+                            
+                            <!-- Node Left: Source -->
+                            <div class="flex flex-col items-center w-24">
+                                <div id="node-source-box" class="w-14 h-14 rounded-full flex items-center justify-center border-2 border-dashed border-slate-700 transition-all duration-500 bg-slate-800 shadow-lg">
+                                    <span id="node-source-text" class="text-xs font-bold text-slate-400">Source</span>
+                                </div>
+                                <span id="node-source-label" class="text-[10px] text-slate-400 mt-2 text-center h-4 overflow-hidden truncate w-24"></span>
+                            </div>
+
+                            <!-- Connection Line / Flow Vector -->
+                            <div class="flex-1 flex flex-col items-center justify-center px-2 relative">
+                                <div class="w-full h-1 bg-slate-800 rounded relative overflow-hidden">
+                                    <div id="flow-pulse" class="absolute top-0 bottom-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-indigo-400 to-transparent rounded transform translate-x-[-100%] transition-transform duration-[1500ms]"></div>
+                                </div>
+                                <div class="absolute -top-6 text-center">
+                                    <span id="flow-method" class="text-[9px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">NONE</span>
+                                </div>
+                                <span id="flow-api-name" class="text-[10px] text-indigo-300 mt-2 font-semibold text-center truncate max-w-[120px]">未啟動</span>
+                            </div>
+
+                            <!-- Node Right: Destination -->
+                            <div class="flex flex-col items-center w-24">
+                                <div id="node-dest-box" class="w-14 h-14 rounded-full flex items-center justify-center border-2 border-dashed border-slate-700 transition-all duration-500 bg-slate-800 shadow-lg">
+                                    <span id="node-dest-text" class="text-xs font-bold text-slate-400">Dest</span>
+                                </div>
+                                <span id="node-dest-label" class="text-[10px] text-slate-400 mt-2 text-center h-4 overflow-hidden truncate w-24"></span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Simulator Controls -->
+                    <div class="relative z-10 pt-4 border-t border-slate-800/80 flex justify-between items-center">
+                        <button onclick="prevStep()" class="text-xs text-slate-400 hover:text-white px-3 py-1.5 rounded bg-slate-800 hover:bg-slate-700 transition">
+                            ◀ 上一步
+                        </button>
+                        <button onclick="nextStep()" class="text-xs text-indigo-300 hover:text-white px-4 py-1.5 rounded bg-indigo-900/50 border border-indigo-700/60 hover:bg-indigo-900 transition font-bold">
+                            下一步 ▶
+                        </button>
+                    </div>
+                </div>
+
+                <!-- API Schema Payload Inspector -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                    <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
+                        <h3 class="text-sm font-bold text-slate-900 flex items-center">
+                            <svg class="w-4 h-4 mr-1.5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            串接 API JSON Payload 預覽
+                        </h3>
+                        <span id="payload-method-badge" class="text-[10px] font-mono font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded">SCHEMA</span>
+                    </div>
+
+                    <!-- Code block -->
+                    <div class="bg-slate-950 rounded-xl p-4 font-mono text-[11px] text-indigo-200 overflow-x-auto relative">
+                        <!-- Copy button -->
+                        <button onclick="copyPayload()" class="absolute right-3 top-3 text-[10px] text-slate-500 hover:text-slate-300 bg-slate-900 px-2 py-1 rounded border border-slate-800 transition">
+                            複製
+                        </button>
+                        <pre id="payload-code" class="leading-relaxed">點擊左側有 API 的步驟來預覽 JSON payload。</pre>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Section 3: Summary API Integration Reference Table -->
+        <section class="mt-8 bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+            <h2 class="text-lg font-bold text-slate-900 mb-6 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
+                核心 API 清單與參數摘要
+            </h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200 text-left text-xs">
+                    <thead class="bg-slate-50 font-semibold text-slate-700">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">API 名稱 / 觸發主體</th>
+                            <th scope="col" class="px-6 py-3">方向 (Sender ➔ Receiver)</th>
+                            <th scope="col" class="px-6 py-3">必要攜帶參數 (Payload Parameters)</th>
+                            <th scope="col" class="px-6 py-3">備註說明與業務邏輯</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 text-slate-600">
+                        <!-- Row 1 -->
+                        <tr class="hover:bg-slate-50/50">
+                            <td class="px-6 py-4 font-bold text-slate-900">
+                                申請 API
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="system-phm">PHM</span> ➔ <span class="system-saho">Saho</span>
+                            </td>
+                            <td class="px-6 py-4 font-mono text-indigo-600">
+                                StudentKey, FamilyKey, Parent Account (SSO Email)
+                            </td>
+                            <td class="px-6 py-4">
+                                家長點擊後自動派送基本身份資料，確保在 Saho 介面無需重填學生身分。
+                            </td>
+                        </tr>
+                        <!-- Row 2 -->
+                        <tr class="hover:bg-slate-50/50">
+                            <td class="px-6 py-4 font-bold text-slate-900">
+                                開立訂單 API
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="system-saho">Saho</span> ➔ <span class="system-phm">PHM</span>
+                            </td>
+                            <td class="px-6 py-4 font-mono text-amber-700">
+                                Studentkey, FamilyKey, Amount
+                            </td>
+                            <td class="px-6 py-4">
+                                填畢後由 Saho 回傳，由 PHM 後台依此 Amount 產生付費訂單。部分特例須預先訂立。
+                            </td>
+                        </tr>
+                        <!-- Row 3 -->
+                        <tr class="hover:bg-slate-50/50">
+                            <td class="px-6 py-4 font-bold text-slate-900">
+                                訂單繳費查詢 API
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="system-saho">Saho</span> ➔ <span class="system-phm">PHM</span> (反向查詢)
+                            </td>
+                            <td class="px-6 py-4 font-mono text-slate-700">
+                                OrderId, Studentkey, FamilyKey, Amount, PaymentStatus
+                            </td>
+                            <td class="px-6 py-4">
+                                Saho 物理製卡前必先查詢此 API，唯有狀態回傳為 <strong class="text-emerald-600">Paid</strong> 時方開始製卡。
+                            </td>
+                        </tr>
+                        <!-- Row 4 -->
+                        <tr class="hover:bg-slate-50/50">
+                            <td class="px-6 py-4 font-bold text-slate-900">
+                                學生卡 API
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="system-phm">PHM</span> ➔ <span class="system-powerschool">PowerSchool</span>
+                            </td>
+                            <td class="px-6 py-4 font-mono text-red-600">
+                                Studentkey, CardNumber
+                            </td>
+                            <td class="px-6 py-4">
+                                PHM 同步自 PowerSchool 的實體卡資料，並於 <span class="system-aos-system">AOS System</span> 自動汰舊換新卡。
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Simple Custom Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white text-xs px-4 py-2.5 rounded-lg shadow-xl translate-y-20 opacity-0 transition-all duration-300 flex items-center space-x-2 z-50">
+        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+        <span id="toast-text">複製成功!</span>
+    </div>
+
+    <!-- Scripting for Live Simulation -->
+    <script>
+        // Steps Data Store
+        const stepsData = {
+            1: {
+                desc: "家長登入 AOS APP，看見 Access Card Request 功能並點擊，開啟全新的門禁卡申辦流程。",
+                source: { text: "Parent", label: "家長", class: "bg-emerald-500 border-emerald-300 text-white" },
+                dest: { text: "AOS APP", label: "AOS APP", class: "bg-emerald-100 text-emerald-700 border-emerald-300" },
+                method: "UI ACTION",
+                api: "家長點擊圖示",
+                payload: null
+            },
+            2: {
+                desc: "AOS APP 接收點擊後，由 PHM 底層拋轉對接。PHM 送出『申請API』給 Saho，預告即將有新的卡片申請單，並攜帶唯一識別學號等關聯資訊。",
+                source: { text: "PHM", label: "PHM (系統公司)", class: "bg-blue-600 border-blue-400 text-white" },
+                dest: { text: "Saho", label: "Saho (門禁廠商)", class: "bg-amber-100 text-amber-700 border-amber-300" },
+                method: "POST",
+                api: "申請 API",
+                payload: {
+                    "api": "CreateCardApplication",
+                    "sender": "PHM",
+                    "receiver": "Saho",
+                    "payload": {
+                        "StudentKey": "TES-2026-99211",
+                        "FamilyKey": "FAM-9831",
+                        "parentAccountSSO": "parent.doe@tes.tp.edu.tw"
+                    }
+                }
+            },
+            3: {
+                desc: "背景拋接建立成功後，AOS APP 畫面直接跳轉跳轉至 Saho 的託管頁面。家長在 Saho 頁面上選取卡片類型、填寫細節表單，並上傳申辦人照片。",
+                source: { text: "AOS APP", label: "AOS APP (網頁導向)", class: "bg-emerald-600 border-emerald-400 text-white" },
+                dest: { text: "Saho Page", label: "Saho 網頁", class: "bg-amber-500 border-amber-300 text-white" },
+                method: "REDIRECT",
+                api: "Web Redirect URL",
+                payload: {
+                    "redirectUrl": "https://saho-portal.tes.tp.edu.tw/apply",
+                    "queryParameters": {
+                        "session": "token_phm_auth_xyz123",
+                        "studentKey": "TES-2026-99211"
+                    }
+                }
+            },
+            4: {
+                desc: "家長在 Saho 畫面按下確認送出後，Saho 後端伺服器會主動向 PHM 傳送『開立訂單API』。包含該學生的識別金鑰以及卡片申辦所需的費用(Amount)。",
+                source: { text: "Saho", label: "Saho (門禁廠商)", class: "bg-amber-600 border-amber-400 text-white" },
+                dest: { text: "PHM", label: "PHM (系統公司)", class: "bg-blue-100 text-blue-700 border-blue-300" },
+                method: "POST",
+                api: "開立訂單 API",
+                payload: {
+                    "api": "CreateBillAndOrder",
+                    "sender": "Saho",
+                    "receiver": "PHM",
+                    "payload": {
+                        "StudentKey": "TES-2026-99211",
+                        "FamilyKey": "FAM-9831",
+                        "Amount": 500.00,
+                        "currency": "TWD"
+                    }
+                }
+            },
+            5: {
+                desc: "PHM 收到 API 金額後，於 AOS 後台與金流核心自動開立訂單。注意特例情況：若需自動化，TES 需預先與 Saho 設定妥當，使 Saho 拋送 Amount 的當下直接在系統鎖定對應，避免人工核對死結。",
+                source: { text: "PHM", label: "PHM 金流核心", class: "bg-blue-600 border-blue-400 text-white" },
+                dest: { text: "AOS Order", label: "AOS 帳務資料庫", class: "bg-purple-100 text-purple-700 border-purple-300" },
+                method: "SYSTEM",
+                api: "自動開立帳單流程",
+                payload: {
+                    "orderId": "ORD-2026-000518",
+                    "studentKey": "TES-2026-99211",
+                    "amount": 500.00,
+                    "orderStatus": "Draft_Or_Published",
+                    "rule": "TES_AutoSync_Predefined"
+                }
+            },
+            6: {
+                desc: "PHM 開立訂單成功後，會對外公開一個『訂單繳費查詢API』端點。任何合法的外部連線均可藉由此端點傳入訂單編號或學號，查詢即時繳費狀態（Paid/Unpaid）。",
+                source: { text: "PHM", label: "PHM (查詢 API)", class: "bg-blue-600 border-blue-400 text-white" },
+                dest: { text: "API Endpoint", label: "提供予 Saho 串接", class: "bg-slate-800 text-slate-300 border-slate-700" },
+                method: "GET",
+                api: "訂單繳費查詢 API",
+                payload: {
+                    "endpoint": "https://api.phm-billing.tes/v1/payment/check",
+                    "queryParams": {
+                        "orderId": "ORD-2026-000518",
+                        "studentKey": "TES-2026-99211",
+                        "familyKey": "FAM-9831",
+                        "amount": 500.00
+                    },
+                    "response": {
+                        "paymentStatus": "Unpaid",
+                        "updatedAt": "2026-05-25T14:25:00Z"
+                    }
+                }
+            },
+            7: {
+                desc: "Saho 的製卡排程系統會定時主動呼叫（Call）PHM 的『訂單繳費查詢API』。一旦 API 返回的狀態為 Paid，Saho 才會發送指令予實體卡印表機，開始進行物理印卡與製卡。",
+                source: { text: "Saho", label: "Saho (門禁廠商)", class: "bg-amber-600 border-amber-400 text-white" },
+                dest: { text: "PHM", label: "PHM (查詢 API)", class: "bg-blue-100 text-blue-700 border-blue-300" },
+                method: "GET / CALL",
+                api: "訂單繳費查詢 API",
+                payload: {
+                    "action": "CheckIfPaidToPrint",
+                    "query": "ORD-2026-000518",
+                    "receivedResponse": {
+                        "orderId": "ORD-2026-000518",
+                        "studentKey": "TES-2026-99211",
+                        "amount": 500.00,
+                        "paymentStatus": "Paid",
+                        "canIssueCard": true
+                    }
+                }
+            },
+            8: {
+                desc: "實體卡片製作完畢且卡號綁定後，Saho 會將全新寫入的卡號數據與學童身分資料包裝，直接推送（Push）傳送給學校的行政核心資料庫 PowerSchool。",
+                source: { text: "Saho", label: "Saho (門禁廠商)", class: "bg-amber-600 border-amber-400 text-white" },
+                dest: { text: "PowerSchool", label: "PowerSchool SIS", class: "bg-red-100 text-red-700 border-red-300" },
+                method: "PUT/POST",
+                api: "開卡資料同步",
+                payload: {
+                    "target": "PowerSchool_CardEnrollment",
+                    "syncData": {
+                        "studentKey": "TES-2026-99211",
+                        "cardIdentifier": "HEX-9982-12A5",
+                        "cardType": "RFID_MIFARE",
+                        "activationDate": "2026-05-25"
+                    }
+                }
+            },
+            9: {
+                desc: "最後，PHM 的背景服務同步 PowerSchool 的『學生卡 API』。撈取到最新卡號（CardNumber）後，自動在 AOS System 後台註冊該新卡，並在後台將原先的舊卡設為『停用』，完成卡片自動新舊交替與資安管理。",
+                source: { text: "PowerSchool", label: "PowerSchool API", class: "bg-red-600 border-red-400 text-white" },
+                dest: { text: "AOS System", label: "AOS 帳務後台", class: "bg-purple-100 text-purple-700 border-purple-300" },
+                method: "SYNC / API",
+                api: "學生卡 API (同步新舊卡)",
+                payload: {
+                    "api": "SyncStudentCardStatus",
+                    "triggerSource": "PowerSchool_WebHook",
+                    "parameters": {
+                        "studentKey": "TES-2026-99211",
+                        "newCardNumber": "HEX-9982-12A5",
+                        "oldCardAction": "Deactivate_And_Archive",
+                        "aosSystemStatus": "UpdatedSuccessfully"
+                    }
+                }
+            }
+        };
+
+        let currentActiveStep = 1;
+
+        // Function to highlight step and simulate the process
+        function selectStep(stepNum) {
+            currentActiveStep = stepNum;
+
+            // Remove previous active classes from all timeline step cards
+            document.querySelectorAll('.step-card').forEach(card => {
+                card.classList.remove('ring-2', 'ring-indigo-600', 'bg-indigo-50/20', 'border-indigo-200');
+                card.classList.add('border-slate-100', 'bg-white');
+            });
+
+            // Reset badges styling
+            document.querySelectorAll('[id^="step-badge-"]').forEach(badge => {
+                badge.classList.remove('bg-indigo-600', 'text-white', 'scale-110');
+                badge.classList.add('bg-slate-200', 'text-slate-600');
+            });
+
+            // Add active classes to selected card
+            const selectedCard = document.getElementById(`step-card-${stepNum}`);
+            if (selectedCard) {
+                selectedCard.classList.remove('border-slate-100', 'bg-white');
+                selectedCard.classList.add('ring-2', 'ring-indigo-600', 'bg-indigo-50/20', 'border-indigo-200');
+            }
+
+            // Set active badge style
+            const selectedBadge = document.getElementById(`step-badge-${stepNum}`);
+            if (selectedBadge) {
+                selectedBadge.classList.remove('bg-slate-200', 'text-slate-600');
+                selectedBadge.classList.add('bg-indigo-600', 'text-white', 'scale-110');
+            }
+
+            // Smoothly scroll step card into view if needed (optional)
+            // selectedCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+            // Update Simulator Visualization
+            updateSimulator(stepNum);
+        }
+
+        // Update the visual simulator nodes on the right
+        function updateSimulator(stepNum) {
+            const data = stepsData[stepNum];
+            if (!data) return;
+
+            // Update Step Text and Description
+            document.getElementById('simulator-step-num').textContent = `Step ${stepNum} / 9`;
+            document.getElementById('simulator-desc').textContent = data.desc;
+
+            // Set Source Node styling
+            const srcBox = document.getElementById('node-source-box');
+            srcBox.className = `w-14 h-14 rounded-full flex items-center justify-center border-2 transition-all duration-500 shadow-lg ${data.source.class}`;
+            document.getElementById('node-source-text').textContent = data.source.text;
+            document.getElementById('node-source-label').textContent = data.source.label;
+
+            // Set Dest Node styling
+            const destBox = document.getElementById('node-dest-box');
+            destBox.className = `w-14 h-14 rounded-full flex items-center justify-center border-2 transition-all duration-500 shadow-lg ${data.dest.class}`;
+            document.getElementById('node-dest-text').textContent = data.dest.text;
+            document.getElementById('node-dest-label').textContent = data.dest.label;
+
+            // Connection Arrow & Method
+            const flowMethod = document.getElementById('flow-method');
+            flowMethod.textContent = data.method;
+            // Style method badge
+            if (data.method === 'POST' || data.method === 'PUT/POST') {
+                flowMethod.className = "text-[9px] font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30";
+            } else if (data.method === 'GET' || data.method === 'GET / CALL') {
+                flowMethod.className = "text-[9px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+            } else if (data.method === 'REDIRECT') {
+                flowMethod.className = "text-[9px] font-mono px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30";
+            } else {
+                flowMethod.className = "text-[9px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700";
+            }
+
+            document.getElementById('flow-api-name').textContent = data.api;
+
+            // Trigger flow line animation pulse
+            const pulse = document.getElementById('flow-pulse');
+            pulse.style.transform = 'translateX(-100%)';
+            setTimeout(() => {
+                pulse.style.transform = 'translateX(300%)';
+            }, 50);
+
+            // Update API Payload Inspector
+            const payloadCode = document.getElementById('payload-code');
+            const methodBadge = document.getElementById('payload-method-badge');
+
+            if (data.payload) {
+                payloadCode.textContent = JSON.stringify(data.payload, null, 2);
+                methodBadge.textContent = data.method;
+                methodBadge.className = `text-[10px] font-mono font-bold px-2 py-0.5 rounded ${
+                    data.method.includes('GET') ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                }`;
+            } else {
+                payloadCode.textContent = "// 此步驟無對外發送之 API JSON Payload (多為網頁前端家長操作)";
+                methodBadge.textContent = "UI FLOW";
+                methodBadge.className = "text-[10px] font-mono font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded";
+            }
+        }
+
+        // Navigation controls for simulation
+        function nextStep() {
+            if (currentActiveStep < 9) {
+                selectStep(currentActiveStep + 1);
+            } else {
+                // Loop back to 1
+                selectStep(1);
+            }
+        }
+
+        function prevStep() {
+            if (currentActiveStep > 1) {
+                selectStep(currentActiveStep - 1);
+            } else {
+                // Loop to 9
+                selectStep(9);
+            }
+        }
+
+        // Copy JSON helper using older standard as instructed for environment robustness
+        function copyPayload() {
+            const codeText = document.getElementById('payload-code').textContent;
+            
+            // Create temporary textarea
+            const tempTextArea = document.createElement("textarea");
+            tempTextArea.value = codeText;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showToast("複製成功！已將 API Payload 複製至剪貼簿。");
+                } else {
+                    showToast("複製失敗，請手動複製。");
+                }
+            } catch (err) {
+                showToast("瀏覽器不支援一鍵複製。");
+            }
+            
+            document.body.removeChild(tempTextArea);
+        }
+
+        function showToast(text) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-text').textContent = text;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // Initialize state on window load
+        window.onload = function() {
+            selectStep(1);
+        };
+    </script>
+</body>
+</html>
